@@ -325,7 +325,7 @@ Ext.define("Rally.app.BacklogHealth", {
                     var statusMessages = _.map(this.counters, function(val, key) {
                         return 'Loading ' + key + ' (' + val.complete + '/' + val.total + ')'
                     })
-                    app.setLoading(statusMessages.join('\n'));
+                    app.setLoading(statusMessages.join('<br/>'));
                 }
             }
         };
