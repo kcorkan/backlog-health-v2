@@ -517,7 +517,7 @@ Ext.define("Rally.app.BacklogHealth", {
         // Get the N upcoming timeboxes in the current project
         // Sort by name
         // Get timeboxes by name from all child projects
-        console.log('getTimeboxes',results);
+        
         var squads = results[0],
             timeboxes = results[0],
             timeboxModel = results[1],
@@ -614,7 +614,9 @@ Ext.define("Rally.app.BacklogHealth", {
                     workProducts = 0;
                 } else {
                     workProducts += wp; 
-                    timeboxOids.push(tbox.get('ObjectID'));
+                    if (wp > 0){
+                        timeboxOids.push(tbox.get('ObjectID'));
+                    }
                 }
             }
         }, this);
