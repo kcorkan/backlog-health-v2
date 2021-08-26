@@ -547,6 +547,7 @@ Ext.define("Rally.app.BacklogHealth", {
                         model: timeboxModel,
                         autoLoad: false,
                         context: dataContext,
+                        useShallowFetch: true,
                         fetch: timeboxFetch,
                         enablePostGet: true,
                         sorters: [{
