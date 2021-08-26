@@ -73,7 +73,7 @@ Ext.define("Rally.app.BacklogHealth", {
             timeboxType: Constants.TIMEBOX_TYPE_ITERATION,
             timeboxCount: 5,
             currentTimebox: true,
-            query: "(Children.State != \"Open\")",
+            query: "(Project.Children.State != \"Open\")",
             includeAll: false,
             points: true 
         }
@@ -90,7 +90,7 @@ Ext.define("Rally.app.BacklogHealth", {
         var status = this._getNewStatus();
         this.addControls(); 
         var promises = [
-            this.getSquads(status),
+        //    this.getSquads(status),
             this.getFutureTimeboxes(this.getSetting('timeboxCount'),status),
             TimeboxExtendedModelBuilder.build(this.timeboxType,'Extended' + this.timeboxType)
         ];
@@ -517,31 +517,30 @@ Ext.define("Rally.app.BacklogHealth", {
         // Get the N upcoming timeboxes in the current project
         // Sort by name
         // Get timeboxes by name from all child projects
-
+        console.log('getTimeboxes',results);
         var squads = results[0],
-            timeboxes = results[1],
-            timeboxModel = results[2],
+            timeboxes = results[0],
+            timeboxModel = results[1],
             timeboxFetch = this.getTimeboxFetchFields(),
             key = "loading timeboxes",
             deferred = Ext.create('Deft.Deferred');  
 
-        var timeboxFilters = _.map(timeboxes, function(timebox) {
-            return Rally.data.wsapi.Filter.and([{
-                property: 'Name',
-                value: timebox.get('Name')
-            }, {
-                property: this.timeboxStartDateField,
-                value: timebox.get(this.timeboxStartDateField)
-            }, {
-                property: this.timeboxEndDateField,
-                value: timebox.get(this.timeboxEndDateField)
-            }]);
-        }, this);
-
-        if (timeboxFilters.length) {
+        var projectFilter = this.getSquadFilters();
+        
+        if (timeboxes.length) {
             var dataContext = this.getContext().getDataContext();
                 dataContext.includePermissions = false;
-                var timeboxPromises = _.map(timeboxFilters, function(timeboxFilter) {
+                var timeboxPromises = _.map(timeboxes, function(timebox) {
+                    var timeboxFilter = [{
+                        property: 'Name',
+                        value: timebox.get('Name')
+                    },{
+                        property: this.timeboxStartDateField,
+                        value: timebox.get(this.timeboxStartDateField)    
+                    },{
+                        property: this.timeboxEndDateField,
+                        value: timebox.get(this.timeboxEndDateField)
+                    },projectFilter];
                     status.progressStart(key);
                     return Ext.create('Rally.data.wsapi.Store', {
                         model: timeboxModel,
@@ -559,11 +558,7 @@ Ext.define("Rally.app.BacklogHealth", {
                                 status.progressEnd(key);
                             }
                         },
-                        filters: [timeboxFilter, {
-                            property: "Project.ObjectID",
-                            operator: 'in',
-                            value: squads
-                        }],
+                        filters: timeboxFilter,
                         pageSize: 2000,
                         limit: Infinity
                     }).load();
@@ -573,7 +568,6 @@ Ext.define("Rally.app.BacklogHealth", {
                         var timeboxes = _.flatten(results);
                         // Group by timebox name
                         var timeboxGroups = _.groupBy(timeboxes, function(timebox) {
-                            console.log('wp',JSON.stringify(timebox.get('WorkProducts')))
                             return timebox.get('Name');
                         });
                         deferred.resolve(timeboxGroups);
