@@ -604,7 +604,8 @@ Ext.define("Rally.app.BacklogHealth", {
     getArtifacts: function(timeboxGroups,status){
         var timeboxesByOid = {},
             key = "loading Artifacts",
-            deferred = Ext.create('Deft.Deferred');
+            deferred = Ext.create('Deft.Deferred'),
+            usePoints = this.getUsePoints();
         
         var promises = _.map(timeboxGroups, function(timeboxGroup) {
             var timeboxOids = _.map(timeboxGroup, function(tbox) {
@@ -623,14 +624,22 @@ Ext.define("Rally.app.BacklogHealth", {
                     status.addError(key);
                     deferred.reject('Error loading artifacts');
                 },
-                success: function(groups) {    
-                    for (var i=0; i<groups.length; i++){
-                        for (var j=0; j<groups[i].length; j++){
-                            var artifact = groups[i][j];
-                            var timeboxOid = Rally.util.Ref.getOidFromRef(artifact.get('Iteration')._ref); 
-                            timeboxesByOid[timeboxOid].addArtifact(usePoints, artifact.getData());
+                success: function(groups) {
+                    //if (usePoints){
+
+                        for (var i=0; i<groups.length; i++){
+                            for (var j=0; j<groups[i].length; j++){
+                                var artifact = groups[i][j];
+                                var timeboxOid = Rally.util.Ref.getOidFromRef(artifact.get('Iteration')._ref); 
+                                timeboxesByOid[timeboxOid].addArtifact(usePoints, artifact.getData());
+                            }
                         }
-                    }
+                    // } else {
+                    //     for (var i=0; i<groups.length; i++){
+                    //         console.lo
+                    //     }
+                    // }    
+                    
                     deferred.resolve(timeboxGroups);
                 }
             });
@@ -640,17 +649,28 @@ Ext.define("Rally.app.BacklogHealth", {
         return deferred.promise;     
     },
     fetchArtifacts: function(modelName,fetchFields,timeboxOids,status,key){
+        var pageSize=2000;
         var dataContext = this.getContext().getDataContext(),
-            filters = {
+            filters = [{
                 property: 'Iteration.ObjectID',
                 operator: 'in',
                 value: timeboxOids 
-            };
+            }];
+            if (this.getUsePoints()){
+                filters.push({
+                    property: 'PlanEstimate',
+                    operator: ">",
+                    value: 0
+                })
+            // } else {
+            //     pageSize = 1;
+            }
+        dataContext.includePermissions = false;
         status.progressStart(key);
         return Ext.create('Rally.data.wsapi.Store',{
             model: modelName, 
             fetch: fetchFields,
-            pageSize: 2000,
+            pageSize: pageSize,
             limit: Infinity,
             autoLoad: false,
             context: dataContext,
