@@ -586,10 +586,10 @@ Ext.define("Rally.app.BacklogHealth", {
         return this.getSetting('includeAll') === true || this.getSetting('includeAll') === "true";
     },
     getTimeboxFetchFields: function(){
-        var fields = ['ObjectID', this.timeboxStartDateField, this.timeboxEndDateField, 'Name', 'PlannedVelocity', 'PlanEstimate', 'Project','WorkProducts'];
-        // if (this.getIncludeAll()){
-        //     fields.push('WorkProducts');
-        // }
+        var fields = ['ObjectID', this.timeboxStartDateField, this.timeboxEndDateField, 'Name', 'PlannedVelocity', 'PlanEstimate', 'Project'];
+        if (this.getIncludeAll()){
+            fields.push('WorkProducts');
+        }
         return fields;
     },
     getArtifactsLookback: function(timeboxGroups,status){
