@@ -431,10 +431,8 @@ Ext.define("Rally.app.BacklogHealth", {
                 var timebox = timeboxGroup[i],
                     plannedVelocity = timebox.getPlannedCapacity(),
                     actualPlanned = timebox.getPlannedBacklog(usePoints, includeAll);
-                console.log('actualPlanned',actualPlanned,planned);
                 
                 planned += actualPlanned;
-                console.log('planned',planned,timeboxName,timebox.get('Project').Name);
                 capacity += plannedVelocity;
                 if (!plannedVelocity){
                     missingVelocities++;
@@ -480,13 +478,12 @@ Ext.define("Rally.app.BacklogHealth", {
     },
     getFutureTimeboxes: function(timeboxCount,status){
         var timeboxFilterProperty = this.timeboxEndDateField;
-        var key = "Loading Timeboxes";
+        var key = "loading future timeboxes";
         if (this.getSetting('currentTimebox')) {
             timeboxFilterProperty = this.timeboxStartDateField;
         }
         var deferred = Ext.create('Deft.Deferred');
         status.progressStart(key);
-        console.log('timeboxType',this.timeboxType);
         Ext.create('Rally.data.wsapi.Store', {
             model: this.timeboxType,
             autoLoad: false,
@@ -544,7 +541,6 @@ Ext.define("Rally.app.BacklogHealth", {
         if (timeboxFilters.length) {
             var dataContext = this.getContext().getDataContext();
                 dataContext.includePermissions = false;
-                console.log('before timeboxload', timeboxModel)
                 var timeboxPromises = _.map(timeboxFilters, function(timeboxFilter) {
                     status.progressStart(key);
                     return Ext.create('Rally.data.wsapi.Store', {
@@ -573,7 +569,6 @@ Ext.define("Rally.app.BacklogHealth", {
                 }, this);
                 Deft.Promise.all(timeboxPromises).then({
                     success: function(results){
-                        console.log('timebox end')
                         var timeboxes = _.flatten(results);
                         // Group by timebox name
                         var timeboxGroups = _.groupBy(timeboxes, function(timebox) {
