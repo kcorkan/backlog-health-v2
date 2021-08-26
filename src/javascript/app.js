@@ -572,6 +572,7 @@ Ext.define("Rally.app.BacklogHealth", {
                         var timeboxes = _.flatten(results);
                         // Group by timebox name
                         var timeboxGroups = _.groupBy(timeboxes, function(timebox) {
+                            console.log('wp',JSON.stringify(timebox.get('WorkProducts')))
                             return timebox.get('Name');
                         });
                         deferred.resolve(timeboxGroups);
@@ -591,9 +592,9 @@ Ext.define("Rally.app.BacklogHealth", {
     },
     getTimeboxFetchFields: function(){
         var fields = ['ObjectID', this.timeboxStartDateField, this.timeboxEndDateField, 'Name', 'PlannedVelocity', 'PlanEstimate', 'Project','WorkProducts'];
-        if (this.getIncludeAll()){
-            fields.push('WorkProducts');
-        }
+        // if (this.getIncludeAll()){
+        //     fields.push('WorkProducts');
+        // }
         return fields;
     },
     getArtifacts: function(timeboxGroups,status){
@@ -603,18 +604,22 @@ Ext.define("Rally.app.BacklogHealth", {
             usePoints = this.getUsePoints();
         
         var promises = [];
+        var fetchFields = ['ObjectID',this.timeboxType,'Project','PlanEstimate','ScheduleState','FormattedID'];
+        
         _.each(timeboxGroups, function(timeboxGroup){
             var workProducts = 0,
                 timeboxOids = [];
             for (var i=0; i<timeboxGroup.length; i++){
-                var wp = timeboxGroup[i].get('WorkProducts').Count;
-                if (workProducts + wp > 2000 && timeboxOids.length > 0){
+                var tbox = timeboxGroup[i];
+                var wp = tbox.get('WorkProducts').Count;
+                timeboxesByOid[tbox.get('ObjectID')] = tbox;
+                if (i === timeboxGroup.length-1 || (workProducts + wp > 2000 && timeboxOids.length > 0)){
                     promises.push(this.fetchArtifacts(this.modelName,fetchFields,timeboxOids,status,key));
                     timeboxOids = [];
                     workProducts = 0;
                 } else {
                     workProducts += wp; 
-                    timeboxOids.push(timeboxGroup[i].get('ObjectID'));
+                    timeboxOids.push(tbox.get('ObjectID'));
                 }
             }
         }, this);
@@ -642,6 +647,7 @@ Ext.define("Rally.app.BacklogHealth", {
                             for (var j=0; j<groups[i].length; j++){
                                 var artifact = groups[i][j];
                                 var timeboxOid = Rally.util.Ref.getOidFromRef(artifact.get('Iteration')._ref); 
+                                if (timeboxesByOid)
                                 timeboxesByOid[timeboxOid].addArtifact(usePoints, artifact.getData());
                             }
                         }
