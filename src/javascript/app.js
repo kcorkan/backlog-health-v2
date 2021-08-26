@@ -602,14 +602,30 @@ Ext.define("Rally.app.BacklogHealth", {
             deferred = Ext.create('Deft.Deferred'),
             usePoints = this.getUsePoints();
         
-        var promises = _.map(timeboxGroups, function(timeboxGroup) {
-            var timeboxOids = _.map(timeboxGroup, function(tbox) {
-                timeboxesByOid[tbox.get('ObjectID')] = tbox;
-                return tbox.get('ObjectID');
-            });
-            var fetchFields = ['ObjectID',this.timeboxType,'Project','PlanEstimate','ScheduleState','FormattedID'];
-            return this.fetchArtifacts(this.modelName,fetchFields,timeboxOids,status,key)
+        var promises = [];
+        _.each(timeboxGroups, function(timeboxGroup){
+            var workProducts = 0,
+                timeboxOids = [];
+            for (var i=0; i<timeboxGroup.length; i++){
+                var wp = timeboxGroup[i].get('WorkProducts').Count;
+                if (workProducts + wp > 2000 && timeboxOids.length > 0){
+                    promises.push(this.fetchArtifacts(this.modelName,fetchFields,timeboxOids,status,key));
+                    timeboxOids = [];
+                    workProducts = 0;
+                } else {
+                    workProducts += wp; 
+                    timeboxOids.push(timeboxGroup[i].get('ObjectID'));
+                }
+            }
         }, this);
+        // var promises = _.map(timeboxGroups, function(timeboxGroup) {
+        //     var timeboxOids = _.map(timeboxGroup, function(tbox) {
+        //         timeboxesByOid[tbox.get('ObjectID')] = tbox;
+        //         return tbox.get('ObjectID');
+        //     });
+        //     var fetchFields = ['ObjectID',this.timeboxType,'Project','PlanEstimate','ScheduleState','FormattedID'];
+        //     return this.fetchArtifacts(this.modelName,fetchFields,timeboxOids,status,key)
+        // }, this);
         var usePoints = this.getUsePoints();
 
         if (promises.length > 0){
