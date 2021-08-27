@@ -653,14 +653,9 @@ Ext.define("Rally.app.BacklogHealth", {
                 property: '_ProjectHierarchy',
                 value: Rally.util.Ref.getOidFromRef(dataContext.project)              
             },{
-                 property: 'PlanEstimate',
-                 operator: "$gt",
-                 value: 0
-            },{
-                property: 'ScheduleState',
-                operator: "$lt",
-                value: "Accepted"
-            }
+                property: 'AcceptedDate',
+                value: null
+             }
         ]);
        
         var store = Ext.create('Rally.data.lookback.SnapshotStore', {
