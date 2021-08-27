@@ -629,12 +629,7 @@ Ext.define("Rally.app.BacklogHealth", {
                             } 
                             timeboxesByOid[timeboxOid].addArtifact(usePoints, artifact.getData());
                         }
-                    }
-                    // } else {
-                    //     for (var i=0; i<groups.length; i++){
-                    //         console.lo
-                    //     }
-                    // }    
+                    }  
                     deferred.resolve(timeboxGroups);
                 }});
         }
@@ -661,6 +656,10 @@ Ext.define("Rally.app.BacklogHealth", {
                  property: 'PlanEstimate',
                  operator: "$gt",
                  value: 0
+            },{
+                property: 'ScheduleState',
+                operator: "$lt",
+                value: "Accepted"
             }
         ]);
        
