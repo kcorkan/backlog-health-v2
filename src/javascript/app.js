@@ -211,7 +211,7 @@ Ext.define("Rally.app.BacklogHealth", {
                 
             for (var i=0; i<timeboxGroup.length ; i++){
                 var timebox = timeboxGroup[i],
-                    project = timebox.get('Project').Name,
+                    project = timebox.get('Project')._refObjectName,
                     name = timebox.get('Name'); 
 
                 if (!obj[project]){ obj[project] = {}; }
