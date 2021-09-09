@@ -735,6 +735,9 @@ Ext.define("Rally.app.BacklogHealth", {
                 property: 'Iteration.ObjectID',
                 operator: 'in',
                 value: timeboxOids 
+            },{
+                property: "AcceptedDate",
+                value: null
             }];
            
         dataContext.includePermissions = false;
