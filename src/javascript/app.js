@@ -1,37 +1,4 @@
 Ext.override(Rally.data.wsapi.Proxy, { timeout:240000 });
-// Ext.override(Rally.app.App, {
-//     /**
-//      * OVERRIDE: PreferenceManager.update returns records, not an updated settings
-//      * hash. This method in the SDK appears to simply apply the wrong data
-//      * to this.settings
-//      */
-
-//     /**
-//      * Update the settings for this app in preferences.
-//      * Provide a settings hash and this will update existing prefs or create new prefs.
-//      * @param options.settings the settings to create/update
-//      * @param options.success called when the prefs are loaded
-//      * @param options.scope scope to call success with
-//      */
-//     updateSettingsValues: function(options) {
-//         Rally.data.PreferenceManager.update(Ext.apply(this._getAppSettingsLoadOptions(), {
-//             requester: this,
-//             settings: options.settings,
-//             success: function(updatedSettings) {
-//                 var updatedSettingsHash = _.reduce(updatedSettings, function(accumulator, updatedSetting) {
-//                     accumulator[updatedSetting.get('Name')] = updatedSetting.get('Value');
-//                     return accumulator;
-//                 }, {});
-//                 Ext.apply(this.settings, updatedSettingsHash);
-
-//                 if (options.success) {
-//                     options.success.call(options.scope);
-//                 }
-//             },
-//             scope: this
-//         }));
-//     }
-// })
 
 /* global Ext Rally Constants Utils */
 Ext.define("Rally.app.BacklogHealth", {
@@ -73,7 +40,7 @@ Ext.define("Rally.app.BacklogHealth", {
             timeboxType: Constants.TIMEBOX_TYPE_ITERATION,
             timeboxCount: 5,
             currentTimebox: true,
-            query: "(Project.Children.State != \"Open\")",
+            query: "((Project.Parent.Parent.Parent.Parent.Parent = null) AND (Project.Parent.Parent.Parent.Parent != null))",
             includeAll: false,
             points: true 
         }
@@ -617,9 +584,6 @@ Ext.define("Rally.app.BacklogHealth", {
                     deferred.reject('Error loading artifacts');
                 },
                 success: function(groups) {
-                    //if (usePoints){ 
-                        console.log('groups',groups)
-
                     for (var i=0; i<groups.length; i++){
                        for (var j=0; j<groups[i].length; j++){
                             var artifact = groups[i][j];
