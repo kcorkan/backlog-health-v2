@@ -444,11 +444,8 @@ Ext.define("Rally.app.BacklogHealth", {
         });
     },
     getFutureTimeboxes: function(timeboxCount,status){
-        var timeboxFilterProperty = this.timeboxEndDateField;
+
         var key = "loading future timeboxes";
-        if (this.getSetting('currentTimebox')) {
-            timeboxFilterProperty = this.timeboxStartDateField;
-        }
         var deferred = Ext.create('Deft.Deferred');
         status.progressStart(key);
         Ext.create('Rally.data.wsapi.Store', {
@@ -459,11 +456,11 @@ Ext.define("Rally.app.BacklogHealth", {
                 projectScopeUp: false
             },
             sorters: [{
-                property: timeboxFilterProperty,
+                property: 'StartDate',
                 direction: 'ASC'
             }],
             filters: [{
-                property: timeboxFilterProperty,
+                property: 'StartDate',
                 operator: '>=',
                 value: 'today'
             }],
