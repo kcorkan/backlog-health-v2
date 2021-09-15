@@ -39,7 +39,7 @@ Ext.define("Rally.app.BacklogHealth", {
             artifactType: 'HierarchicalRequirement',
             timeboxType: Constants.TIMEBOX_TYPE_ITERATION,
             timeboxCount: 5,
-            currentTimebox: true,
+            currentTimebox: false,
             query: "((Project.Parent.Parent.Parent.Parent.Parent = null) AND (Project.Parent.Parent.Parent.Parent != null))",
             includeAll: false,
             points: true 
