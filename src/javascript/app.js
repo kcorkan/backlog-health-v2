@@ -217,7 +217,7 @@ Ext.define("Rally.app.BacklogHealth", {
                 var timeboxOids = _.map(timeboxGroup, function(t){
                     return t.get('ObjectID');
                 });
-                return this.fetchArtifacts(this.modelName,fetchFieldsForExport,timeboxOids,status,key);
+                return this.fetchArtifacts(this.modelName,fetchFieldsForExport,timeboxOids,status,key,true);
             }, this);
 
             if (promises.length > 0){
@@ -231,6 +231,7 @@ Ext.define("Rally.app.BacklogHealth", {
                             accum[field] = field;
                             return accum;
                         }, {}, this);
+                        console.log('artifacts',artifacts,exportfields)
                         var csvText = CArABU.technicalservices.FileUtilities.convertDataArrayToCSVText(artifacts, exportfields);
                         CArABU.technicalservices.FileUtilities.saveCSVToFile(csvText, 'backlog-health.csv');
                         this.setLoading(false);
@@ -689,7 +690,7 @@ Ext.define("Rally.app.BacklogHealth", {
         }
         return deferred.promise;     
     },
-    fetchArtifacts: function(modelName,fetchFields,timeboxOids,status,key){
+    fetchArtifacts: function(modelName,fetchFields,timeboxOids,status,key, fullFetch){
         var pageSize=2000;
         var dataContext = this.getContext().getDataContext(),
             filters = [{
@@ -702,15 +703,23 @@ Ext.define("Rally.app.BacklogHealth", {
             }];
            
         dataContext.includePermissions = false;
+
+        var updatedFetchFields = fetchFields.slice();
+        var shallowFetch = true; 
+        if (fullFetch === true){
+            updatedFetchFields.push('EmailAddress');
+            console.log('updatedFetchFields',updatedFetchFields)
+            shallowFetch = false;     
+        }
         status.progressStart(key);
         return Ext.create('Rally.data.wsapi.Store',{
             model: modelName, 
-            fetch: fetchFields,
+            fetch: updatedFetchFields,
             pageSize: pageSize,
             limit: Infinity,
             autoLoad: false,
             context: dataContext,
-            useShallowFetch: true,
+            useShallowFetch: shallowFetch,
             enablePostGet: true,
             filters: filters,
             listeners: {
